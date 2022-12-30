@@ -1,4 +1,4 @@
-# Upgrade Python installation
+# Upgrade Python Installation
 
 This guide documents how to upgrade the Python installation on a TXT 4.0 to the latest version (currently [Python 3.11](https://www.python.org/downloads/)) _without_ touching the delivered installation (currently Python 3.5).
 
@@ -60,3 +60,63 @@ make install
 This step will roughly take 45 minutes.
 
 ## 2) Configure Python Installation on TXT 4.0
+
+To make use of the full I/O capabilities, Python 3.11 (unfortunately) will have to be run with `sudo` privileges.
+This makes setting the respective environment variables of the Python binary and library location a bit cumbersome. I propose the following workaround:
+
+### Step 2.1: Create a wrapping shell script
+
+Create a [shell script](/assets/py-sudo-wrapper.sh), which ...
+
+- ... will be called with sudo privileges
+- ... accepts the Python program to be run as an argument
+- ... sets the Python binary location as well as the library location
+- ... calls Python and passes the respective program as an argument
+
+In essence, this script wraps the Python executable and temporarily sets the environment variables in the root context.
+This ensures, that any existing installation of Python is not touched (and thus not broken).
+
+In our case, the environment variables are set as follows:
+
+```bash
+export PATH=/opt/ft/workspaces/ext_sd/mmcblk1/python-3.11/bin:$PATH
+export LD_LIBRARY_PATH=/opt/ft/workspaces/ext_sd/mmcblk1/python-3.11/lib:/$LD_LIBRARY_PATH
+```
+
+### Step 2.2: Check installation
+
+Run the [wrapper script](/assets/py-sudo-wrapper.sh) from the previous step to check if the work has been successful so far.
+
+```bash
+sudo /home/david/py-sudo-wrapper.sh
+```
+
+### Step 2.3: Create symbolic links
+
+OpenSource Python packages are typically installed with `pip`.
+Unfortunately, the Python modules for controlling the I/Os of the TXT 4.0 are not publicly available.
+As a workaround, we create symbolic links from our custom Python installation to the delivered Python installation for the following files or folders:
+
+- `ft.py`
+- `_ft.so`
+- `ftlock.py`
+- `_ftlock.so`
+- `ft.py`
+- `ft_controllerlib-6.1.2-py3.5.egg-info`
+- `fischertechnik`
+
+Example:
+
+```bash
+ln -s /usr/lib/python3.5/site-packages/ft.py /opt/ft/workspaces/ext_sd/mmcblk1/python-3.11/lib/python3.11/site-packages/ft.py
+```
+
+## Usage
+
+Run the [wrapper script](/assets/py-sudo-wrapper.sh) with sudo privileges and pass a Python program of your choice as an argument:
+
+Example (assuming `omniwheels.py` has been loaded to the TXT 4.0):
+
+```bash
+sudo /home/david/py-sudo-wrapper.sh /opt/ft/workspaces/omniwheels.py
+```
