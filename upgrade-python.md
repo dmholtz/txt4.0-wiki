@@ -94,7 +94,7 @@ sudo /home/david/py-sudo-wrapper.sh
 ### Step 2.3: Create symbolic links
 
 OpenSource Python packages are typically installed with `pip`.
-Unfortunately, the Python modules for controlling the I/Os of the TXT 4.0 are not publicly available.
+Unfortunately, the Python modules for controlling the I/Os of the TXT 4.0 are not available via `pip`.
 As a workaround, we create symbolic links from our custom Python installation to the delivered Python installation for the following files or folders:
 
 - `ft.py`
